@@ -2023,12 +2023,17 @@ parse_get_aliases_response (SnapdRequest *request, SoupMessageHeaders *headers, 
                 status = SNAPD_ALIAS_STATUS_DISABLED;
             else if (strcmp (status_string, "auto") == 0)
                 status = SNAPD_ALIAS_STATUS_AUTO;
+            else if (strcmp (status_string, "manual") == 0)
+                status = SNAPD_ALIAS_STATUS_MANUAL;
             else
                 status = SNAPD_ALIAS_STATUS_UNKNOWN;
 
             alias = g_object_new (SNAPD_TYPE_ALIAS,
                                   "snap", snap,
                                   "app", get_string (o, "app", NULL),
+                                  "auto-target", get_string (o, "auto", NULL),
+                                  "command", get_string (o, "command", NULL),
+                                  "manual-target", get_string (o, "manual", NULL),
                                   "name", name,
                                   "status", status,
                                   NULL);
@@ -5563,6 +5568,7 @@ snapd_client_disable_aliases_finish (SnapdClient *client, GAsyncResult *result, 
  * Returns: %TRUE on success or %FALSE on error.
  *
  * Since: 1.8
+ * Deprecated: 1.16: Use snapd_client_disable_aliases_sync()
  */
 gboolean
 snapd_client_reset_aliases_sync (SnapdClient *client,
@@ -5597,6 +5603,7 @@ snapd_client_reset_aliases_sync (SnapdClient *client,
  * See snapd_client_reset_aliases_sync() for more information.
  *
  * Since: 1.8
+ * Deprecated: 1.16: Use snapd_client_disable_aliases_async()
  */
 void
 snapd_client_reset_aliases_async (SnapdClient *client,
@@ -5622,6 +5629,7 @@ snapd_client_reset_aliases_async (SnapdClient *client,
  * Returns: %TRUE on success or %FALSE on error.
  *
  * Since: 1.8
+ * Deprecated: 1.16: Use snapd_client_disable_aliases_finish()
  */
 gboolean
 snapd_client_reset_aliases_finish (SnapdClient *client, GAsyncResult *result, GError **error)

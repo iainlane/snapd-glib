@@ -4,6 +4,9 @@
 SnapdAlias
 SnapdAliasStatus
 snapd_alias_get_app
+snapd_alias_get_auto_target
+snapd_alias_get_command
+snapd_alias_get_manual_target
 snapd_alias_get_name
 snapd_alias_get_snap
 snapd_alias_get_status

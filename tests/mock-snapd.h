@@ -84,7 +84,10 @@ typedef struct
 typedef struct
 {
     gchar *name;
+    gchar *command;
     gchar *status;
+    gchar *auto_target;
+    gchar *manual_target;
 } MockAlias;
 
 typedef struct
@@ -175,8 +178,17 @@ MockApp        *mock_snap_add_app                 (MockSnap      *snap,
 MockAlias      *mock_app_add_alias                (MockApp       *app,
                                                    const gchar   *alias);
 
+void            mock_alias_set_command            (MockAlias     *alias,
+                                                   const gchar   *command);
+
 void            mock_alias_set_status             (MockAlias     *alias,
                                                    const gchar   *status);
+
+void            mock_alias_set_auto_target        (MockAlias     *alias,
+                                                   const gchar   *target);
+
+void            mock_alias_set_manual_target      (MockAlias     *alias,
+                                                   const gchar   *target);
 
 void            mock_app_set_daemon               (MockApp       *app,
                                                    const gchar   *daemon);

@@ -37,8 +37,11 @@ struct _SnapdAlias
     GObject parent_instance;
 
     gchar *app;
+    gchar *command;
     gchar *name;
     gchar *snap;
+    gchar *auto_target;
+    gchar *manual_target;
     SnapdAliasStatus status;
 };
 
@@ -48,6 +51,9 @@ enum
     PROP_NAME,
     PROP_SNAP,
     PROP_STATUS,
+    PROP_COMMAND,
+    PROP_AUTO_TARGET,
+    PROP_MANUAL_TARGET,
     PROP_LAST
 };
 
@@ -62,12 +68,64 @@ G_DEFINE_TYPE (SnapdAlias, snapd_alias, G_TYPE_OBJECT)
  * Returns: an app name.
  *
  * Since: 1.8
+ * Deprecated: 1.16: Use snapd_alias_get_manual_target() or snapd_alias_get_auto_target().
  */
 const gchar *
 snapd_alias_get_app (SnapdAlias *alias)
 {
     g_return_val_if_fail (SNAPD_IS_ALIAS (alias), NULL);
     return alias->app;
+}
+
+/**
+ * snapd_alias_get_auto_target:
+ * @alias: a #SnapdAlias.
+ *
+ * Get the automatic target this alias is for.
+ *
+ * Returns: (allow-none): a snap name or %NULL.
+ *
+ * Since: 1.16
+ */
+const gchar *
+snapd_alias_get_auto_target (SnapdAlias *alias)
+{
+    g_return_val_if_fail (SNAPD_IS_ALIAS (alias), NULL);
+    return alias->auto_target;
+}
+
+/**
+ * snapd_alias_get_command:
+ * @alias: a #SnapdAlias.
+ *
+ * Get the command this alias runs.
+ *
+ * Returns: a command.
+ *
+ * Since: 1.16
+ */
+const gchar *
+snapd_alias_get_command (SnapdAlias *alias)
+{
+    g_return_val_if_fail (SNAPD_IS_ALIAS (alias), NULL);
+    return alias->command;
+}
+
+/**
+ * snapd_alias_get_manual_target:
+ * @alias: a #SnapdAlias.
+ *
+ * Get the manual target this alias is for.
+ *
+ * Returns: (allow-none): a snap name or %NULL.
+ *
+ * Since: 1.16
+ */
+const gchar *
+snapd_alias_get_manual_target (SnapdAlias *alias)
+{
+    g_return_val_if_fail (SNAPD_IS_ALIAS (alias), NULL);
+    return alias->manual_target;
 }
 
 /**
@@ -131,6 +189,18 @@ snapd_alias_set_property (GObject *object, guint prop_id, const GValue *value, G
         g_free (alias->app);
         alias->app = g_strdup (g_value_get_string (value));
         break;
+    case PROP_AUTO_TARGET:
+        g_free (alias->auto_target);
+        alias->auto_target = g_strdup (g_value_get_string (value));
+        break;
+    case PROP_COMMAND:
+        g_free (alias->command);
+        alias->command = g_strdup (g_value_get_string (value));
+        break;
+    case PROP_MANUAL_TARGET:
+        g_free (alias->manual_target);
+        alias->manual_target = g_strdup (g_value_get_string (value));
+        break;
     case PROP_NAME:
         g_free (alias->name);
         alias->name = g_strdup (g_value_get_string (value));
@@ -157,6 +227,15 @@ snapd_alias_get_property (GObject *object, guint prop_id, GValue *value, GParamS
     case PROP_APP:
         g_value_set_string (value, alias->app);
         break;
+    case PROP_AUTO_TARGET:
+        g_value_set_string (value, alias->auto_target);
+        break;
+    case PROP_COMMAND:
+        g_value_set_string (value, alias->command);
+        break;
+    case PROP_MANUAL_TARGET:
+        g_value_set_string (value, alias->manual_target);
+        break;
     case PROP_NAME:
         g_value_set_string (value, alias->name);
         break;
@@ -178,6 +257,9 @@ snapd_alias_finalize (GObject *object)
     SnapdAlias *alias = SNAPD_ALIAS (object);
 
     g_clear_pointer (&alias->app, g_free);
+    g_clear_pointer (&alias->auto_target, g_free);
+    g_clear_pointer (&alias->command, g_free);
+    g_clear_pointer (&alias->manual_target, g_free);
     g_clear_pointer (&alias->name, g_free);
     g_clear_pointer (&alias->snap, g_free);
 }
@@ -196,6 +278,30 @@ snapd_alias_class_init (SnapdAliasClass *klass)
                                      g_param_spec_string ("app",
                                                           "app",
                                                           "App this alias is for",
+                                                          NULL,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    g_object_class_install_property (gobject_class,
+                                     PROP_AUTO_TARGET,
+                                     g_param_spec_string ("auto-target",
+                                                          "auto-target",
+                                                          "Automatic target for this alias",
+                                                          NULL,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    g_object_class_install_property (gobject_class,
+                                     PROP_COMMAND,
+                                     g_param_spec_string ("command",
+                                                          "command",
+                                                          "Command this alias runs",
+                                                          NULL,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    g_object_class_install_property (gobject_class,
+                                     PROP_MANUAL_TARGET,
+                                     g_param_spec_string ("manual-target",
+                                                          "manual-target",
+                                                          "Manual target for this alias",
                                                           NULL,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 

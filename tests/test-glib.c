@@ -2877,13 +2877,17 @@ test_get_aliases (void)
     s = mock_snapd_add_snap (snapd, "snap1");
     a = mock_snap_add_app (s, "app1");
     al = mock_app_add_alias (a, "alias1");
-    mock_alias_set_status (al, "enabled");
+    mock_alias_set_status (al, "disabled");
     a = mock_snap_add_app (s, "app2");
     al = mock_app_add_alias (a, "alias2");
-    mock_alias_set_status (al, "disabled");
+    mock_alias_set_status (al, "auto");
+    mock_alias_set_auto_target (al, "auto-app");
     s = mock_snapd_add_snap (snapd, "snap2");
     a = mock_snap_add_app (s, "app3");
-    mock_app_add_alias (a, "alias3");
+    al = mock_app_add_alias (a, "alias3");
+    mock_alias_set_status (al, "manual");
+    mock_alias_set_auto_target (al, "auto-app");
+    mock_alias_set_manual_target (al, "manual-app");
 
     client = snapd_client_new_from_socket (mock_snapd_get_client_socket (snapd));
     snapd_client_connect_sync (client, NULL, &error);
@@ -2896,18 +2900,21 @@ test_get_aliases (void)
     alias = aliases->pdata[0];
     g_assert_cmpstr (snapd_alias_get_snap (alias), ==, "snap1");
     g_assert_cmpstr (snapd_alias_get_name (alias), ==, "alias1");
-    g_assert_cmpstr (snapd_alias_get_app (alias), ==, "app1");
-    g_assert_cmpint (snapd_alias_get_status (alias), ==, SNAPD_ALIAS_STATUS_ENABLED);
+    g_assert_cmpint (snapd_alias_get_status (alias), ==, SNAPD_ALIAS_STATUS_DISABLED);
+    g_assert_null (snapd_alias_get_auto_target (alias));
+    g_assert_null (snapd_alias_get_manual_target (alias));
     alias = aliases->pdata[1];
     g_assert_cmpstr (snapd_alias_get_snap (alias), ==, "snap1");
     g_assert_cmpstr (snapd_alias_get_name (alias), ==, "alias2");
-    g_assert_cmpstr (snapd_alias_get_app (alias), ==, "app2");
-    g_assert_cmpint (snapd_alias_get_status (alias), ==, SNAPD_ALIAS_STATUS_DISABLED);
+    g_assert_cmpint (snapd_alias_get_status (alias), ==, SNAPD_ALIAS_STATUS_AUTO);
+    g_assert_cmpstr (snapd_alias_get_auto_target (alias), ==, "auto-app");
+    g_assert_null (snapd_alias_get_manual_target (alias));
     alias = aliases->pdata[2];
     g_assert_cmpstr (snapd_alias_get_snap (alias), ==, "snap2");
     g_assert_cmpstr (snapd_alias_get_name (alias), ==, "alias3");
-    g_assert_cmpstr (snapd_alias_get_app (alias), ==, "app3");
-    g_assert_cmpint (snapd_alias_get_status (alias), ==, SNAPD_ALIAS_STATUS_DEFAULT);
+    g_assert_cmpint (snapd_alias_get_status (alias), ==, SNAPD_ALIAS_STATUS_MANUAL);
+    g_assert_cmpstr (snapd_alias_get_auto_target (alias), ==, "auto-app");
+    g_assert_cmpstr (snapd_alias_get_manual_target (alias), ==, "manual-app");
 }
 
 static void

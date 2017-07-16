@@ -15,7 +15,24 @@ QSnapdAlias::QSnapdAlias (void *snapd_object, QObject *parent) : QSnapdWrappedOb
 
 QString QSnapdAlias::app () const
 {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     return snapd_alias_get_app (SNAPD_ALIAS (wrapped_object));
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+}
+
+QString QSnapdAlias::autoTarget () const
+{
+    return snapd_alias_get_auto_target (SNAPD_ALIAS (wrapped_object));
+}
+
+QString QSnapdAlias::command () const
+{
+    return snapd_alias_get_command (SNAPD_ALIAS (wrapped_object));
+}
+
+QString QSnapdAlias::manualTarget () const
+{
+    return snapd_alias_get_manual_target (SNAPD_ALIAS (wrapped_object));
 }
 
 QString QSnapdAlias::name () const
@@ -42,6 +59,8 @@ QSnapdAlias::QSnapdAliasStatus QSnapdAlias::status () const
     case SNAPD_ALIAS_STATUS_DISABLED:
         return QSnapdAliasStatus::Disabled;
     case SNAPD_ALIAS_STATUS_AUTO:
-      return QSnapdAliasStatus::Auto;
+        return QSnapdAliasStatus::Auto;
+    case SNAPD_ALIAS_STATUS_MANUAL:
+        return QSnapdAliasStatus::Manual;
     }
 }

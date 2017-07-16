@@ -2281,13 +2281,17 @@ test_get_aliases ()
     MockSnap *s = mock_snapd_add_snap (snapd, "snap1");
     MockApp *a = mock_snap_add_app (s, "app1");
     MockAlias *al = mock_app_add_alias (a, "alias1");
-    mock_alias_set_status (al, "enabled");
+    mock_alias_set_status (al, "disabled");
     a = mock_snap_add_app (s, "app2");
     al = mock_app_add_alias (a, "alias2");
-    mock_alias_set_status (al, "disabled");
+    mock_alias_set_status (al, "auto");
+    mock_alias_set_auto_target (al, "auto-app");
     s = mock_snapd_add_snap (snapd, "snap2");
     a = mock_snap_add_app (s, "app3");
-    mock_app_add_alias (a, "alias3");
+    al = mock_app_add_alias (a, "alias3");
+    mock_alias_set_status (al, "manual");
+    mock_alias_set_auto_target (al, "auto-app");
+    mock_alias_set_manual_target (al, "manual-app");
 
     QSnapdClient client (g_socket_get_fd (mock_snapd_get_client_socket (snapd)));
     QScopedPointer<QSnapdConnectRequest> connectRequest (client.connect ());
@@ -2301,18 +2305,21 @@ test_get_aliases ()
     QScopedPointer<QSnapdAlias> alias0 (getAliasesRequest->alias (0));
     g_assert (alias0->snap () == "snap1");
     g_assert (alias0->name () == "alias1");
-    g_assert (alias0->app () == "app1");
-    g_assert_cmpint (alias0->status (), ==, QSnapdAlias::Enabled);
+    g_assert_cmpint (alias0->status (), ==, QSnapdAlias::Disabled);
+    g_assert (alias0->autoTarget () == NULL);
+    g_assert (alias0->manualTarget () == NULL);
     QScopedPointer<QSnapdAlias> alias1 (getAliasesRequest->alias (1));
     g_assert (alias1->snap () == "snap1");
     g_assert (alias1->name () == "alias2");
-    g_assert (alias1->app () == "app2");
-    g_assert_cmpint (alias1->status (), ==, QSnapdAlias::Disabled);
+    g_assert_cmpint (alias1->status (), ==, QSnapdAlias::Auto);
+    g_assert (alias1->autoTarget () == "auto-app");
+    g_assert (alias1->manualTarget () == NULL);
     QScopedPointer<QSnapdAlias> alias2 (getAliasesRequest->alias (2));
     g_assert (alias2->snap () == "snap2");
     g_assert (alias2->name () == "alias3");
-    g_assert (alias2->app () == "app3");
-    g_assert_cmpint (alias2->status (), ==, QSnapdAlias::Default);
+    g_assert_cmpint (alias2->status (), ==, QSnapdAlias::Manual);
+    g_assert (alias2->autoTarget () == "auto-app");
+    g_assert (alias2->manualTarget () == "manual-app");
 }
 
 static void

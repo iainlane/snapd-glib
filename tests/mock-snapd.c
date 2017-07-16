@@ -77,7 +77,10 @@ static void
 mock_alias_free (MockAlias *alias)
 {
     g_free (alias->name);
+    g_free (alias->command);
     g_free (alias->status);
+    g_free (alias->auto_target);
+    g_free (alias->manual_target);
     g_slice_free (MockAlias, alias);
 }
 
@@ -411,6 +414,7 @@ mock_app_add_alias (MockApp *app, const gchar *name)
 
     alias = g_slice_new0 (MockAlias);
     alias->name = g_strdup (name);
+    alias->status = g_strdup ("disabled");
     app->aliases = g_list_append (app->aliases, alias);
 
     return alias;
@@ -440,6 +444,20 @@ mock_alias_set_status (MockAlias *alias, const gchar *status)
 {
     g_free (alias->status);
     alias->status = g_strdup (status);
+}
+
+void
+mock_alias_set_auto_target (MockAlias *alias, const gchar *target)
+{
+    g_free (alias->auto_target);
+    alias->auto_target = g_strdup (target);
+}
+
+void
+mock_alias_set_manual_target (MockAlias *alias, const gchar *target)
+{
+    g_free (alias->manual_target);
+    alias->manual_target = g_strdup (target);
 }
 
 void
@@ -2278,9 +2296,19 @@ handle_aliases (MockSnapd *snapd, const gchar *method, SoupMessageHeaders *heade
                     json_builder_begin_object (builder);
                     json_builder_set_member_name (builder, "app");
                     json_builder_add_string_value (builder, app->name);
-                    if (alias->status != NULL) {
-                        json_builder_set_member_name (builder, "status");
-                        json_builder_add_string_value (builder, alias->status);
+                    if (alias->command != NULL) {
+                        json_builder_set_member_name (builder, "command");
+                        json_builder_add_string_value (builder, alias->command);
+                    }
+                    json_builder_set_member_name (builder, "status");
+                    json_builder_add_string_value (builder, alias->status);
+                    if (alias->auto_target != NULL) {
+                        json_builder_set_member_name (builder, "auto");
+                        json_builder_add_string_value (builder, alias->auto_target);
+                    }
+                    if (alias->manual_target != NULL) {
+                        json_builder_set_member_name (builder, "manual");
+                        json_builder_add_string_value (builder, alias->manual_target);
                     }
                     json_builder_end_object (builder);
                 }
